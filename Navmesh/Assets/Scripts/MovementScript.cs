@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.AI;
 
 public class MovementScript : MonoBehaviour
 {
@@ -8,6 +9,10 @@ public class MovementScript : MonoBehaviour
     public Animator anim;
     string lastRotation;
     public float topSpeed;
+    public NavMeshAgent agent;
+    Vector3 directionToMove;
+
+    public int playerspeed;
 
     public static bool Invincible = false;
 
@@ -20,33 +25,37 @@ public class MovementScript : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if(rb.velocity.magnitude > topSpeed)
+        agent.Move(directionToMove);
+
+        if (rb.velocity.magnitude > topSpeed)
         {
             rb.velocity = rb.velocity.normalized * topSpeed;
         }
 
+        
         anim.Play(lastRotation);
         if(Input.GetAxisRaw("Vertical") >=0.1)
         {
-            rb.AddForce(-Vector3.forward*Time.deltaTime* 100);
+            directionToMove = -Vector3.forward * playerspeed * Time.deltaTime;
             lastRotation = "Up";
         }
         else if(Input.GetAxisRaw("Vertical") <= -0.1)
         {
-            rb.AddForce(Vector3.forward *Time.deltaTime * 100);
+            directionToMove = Vector3.forward * playerspeed * Time.deltaTime;
             lastRotation = "Down";
         }
         else if(Input.GetAxisRaw("Horizontal") >= 0.1)
         {
-            rb.AddForce(Vector3.left * Time.deltaTime * 100);
+            directionToMove = Vector3.left * playerspeed * Time.deltaTime;
             lastRotation = "Right";
         }
         else if (Input.GetAxisRaw("Horizontal") <= -0.1)
         {
-            rb.AddForce(-Vector3.left * Time.deltaTime * 100);
+            directionToMove = Vector3.right * playerspeed * Time.deltaTime;
             lastRotation = "Left";
 
         }
+        
     }
 
     private void OnCollisionEnter(Collision collision)
@@ -59,7 +68,7 @@ public class MovementScript : MonoBehaviour
         if(collision != null && collision.gameObject.tag == "PowerUp")
         {
             StartCoroutine(InvulnTimer());
-            topSpeed += 4;
+            playerspeed += 4;
             Invincible = true;
             Destroy(collision.gameObject);
             
@@ -77,7 +86,7 @@ public class MovementScript : MonoBehaviour
         yield return new WaitForSeconds(7);
         Debug.Log("AA EE OO");
         Invincible = false;
-        topSpeed -=4;
+        playerspeed -=4;
         yield return new WaitForSeconds(0.01f);
     }
 
