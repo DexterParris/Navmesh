@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
+using TMPro;
 
 public class MovementScript : MonoBehaviour
 {
@@ -11,6 +12,14 @@ public class MovementScript : MonoBehaviour
     public float topSpeed;
     public NavMeshAgent agent;
     Vector3 directionToMove;
+    public int playerlives = 3;
+
+    public TextMeshProUGUI livestext;
+
+
+    public GameObject upCube, downCube, leftCube, rightCube;
+
+
 
     public int playerspeed;
 
@@ -19,6 +28,7 @@ public class MovementScript : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        livestext.text = "Lives: " + playerlives.ToString();
         Invincible = false;
     }
 
@@ -32,28 +42,47 @@ public class MovementScript : MonoBehaviour
             rb.velocity = rb.velocity.normalized * topSpeed;
         }
 
-        
-        anim.Play(lastRotation);
-        if(Input.GetAxisRaw("Vertical") >=0.1)
+
+        if (upCube.GetComponent<CubeScript>().IsTouchingGrid && lastRotation == "Up")
         {
             directionToMove = -Vector3.forward * playerspeed * Time.deltaTime;
+            anim.Play(lastRotation);
+        }
+        else if (downCube.GetComponent<CubeScript>().IsTouchingGrid && lastRotation == "Down")
+        {
+            directionToMove = Vector3.forward * playerspeed * Time.deltaTime;
+            anim.Play(lastRotation);
+        }
+        else if (leftCube.GetComponent<CubeScript>().IsTouchingGrid && lastRotation == "Left")
+        {
+            directionToMove = Vector3.right * playerspeed * Time.deltaTime;
+            anim.Play(lastRotation);
+        }
+        else if (rightCube.GetComponent<CubeScript>().IsTouchingGrid && lastRotation == "Right")
+        {
+            directionToMove = Vector3.left * playerspeed * Time.deltaTime;
+            anim.Play(lastRotation);
+        }
+
+
+
+
+        
+        if(Input.GetAxisRaw("Vertical") >=0.1)
+        {
             lastRotation = "Up";
         }
         else if(Input.GetAxisRaw("Vertical") <= -0.1)
         {
-            directionToMove = Vector3.forward * playerspeed * Time.deltaTime;
             lastRotation = "Down";
         }
         else if(Input.GetAxisRaw("Horizontal") >= 0.1)
         {
-            directionToMove = Vector3.left * playerspeed * Time.deltaTime;
             lastRotation = "Right";
         }
         else if (Input.GetAxisRaw("Horizontal") <= -0.1)
         {
-            directionToMove = Vector3.right * playerspeed * Time.deltaTime;
             lastRotation = "Left";
-
         }
         
     }
@@ -77,6 +106,13 @@ public class MovementScript : MonoBehaviour
         if(collision != null && collision.gameObject.tag == "Ghost" && Invincible == true)
         {
             collision.gameObject.GetComponentInChildren<GhostScript>().Die();
+        }
+        else if(collision != null && collision.gameObject.tag == "Ghost" && Invincible != true)
+        {
+            playerlives -= 1;
+            livestext.text = "Lives: " + playerlives.ToString();
+
+            //kill the player
         }
     }
 
